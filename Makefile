@@ -4,7 +4,7 @@ GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
-BINARY_NAME=scape_goat
+BINARY_NAME=scape-goat
 BINARY_UNIX=$(BINARY_NAME)_unix
 
 all: test build
