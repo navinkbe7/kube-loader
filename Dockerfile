@@ -5,8 +5,8 @@ WORKDIR /
 
 USER root
 
-ADD scape_goat_unix /scape_goat/
+ADD scape-goat_unix /scape-goat/
 
-WORKDIR /uls-forwarder/
+WORKDIR /scape-goat/
 
-CMD  ["./scape_goat_unix"]
+CMD  ["./scape-goat_unix"]

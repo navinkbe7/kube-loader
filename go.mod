@@ -1,4 +1,4 @@
-module github.com/navinkbe7/kube-loader
+module github.com/navinkbe7/scape-goat
 
 go 1.12
 

@@ -36,4 +36,4 @@ docker-push:
 docker-run:
 				docker run --rm -it -p 8080:8080 \
 				-e MY_RESPONSE=container1 \
-				pnet-unified-logging/$(BINARY_NAME):latest
+				navinkbe7/$(BINARY_NAME):latest
