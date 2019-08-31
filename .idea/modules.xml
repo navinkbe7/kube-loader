@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/kube-loader.iml" filepath="$PROJECT_DIR$/.idea/kube-loader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/scape-goat.iml" filepath="$PROJECT_DIR$/.idea/scape-goat.iml" />
     </modules>
   </component>
 </project>
