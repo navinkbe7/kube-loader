@@ -35,4 +35,14 @@ tasks:
       - kubectl scale --replicas=3 deployment/${HELM_RELEASE} --namespace ${NAMESPACE}
       - kubectl get deployments -n ${NAMESPACE} ${HELM_RELEASE}
 
- #poke_persistent_volumes:
+  load_disk:
+    cmds:
+      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- rm -rf /data/file
+      - cmd: kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n kube-loader -- dd if=/dev/zero of=/data/file bs=1M count=1800
+        ignore_error: true
+      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- df -h | grep /data
+
+  clean_disk:
+    cmds:
+      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- rm -rf /data/file
+      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- df -h | grep /data
