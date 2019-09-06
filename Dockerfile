@@ -9,4 +9,6 @@ ADD scape-goat_unix /scape-goat/
 
 WORKDIR /scape-goat/
 
+COPY scripts/ /scape-goat/scripts/
+
 CMD  ["./scape-goat_unix"]

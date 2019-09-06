@@ -30,6 +30,21 @@ tasks:
     cmds:
       - ${HELM_VERSION} delete --purge ${HELM_RELEASE} --tiller-namespace ${NAMESPACE}
 
+  load_cpu:
+    cmds:
+      - kubectl exec -t $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- cat /dev/urandom | gzip -9 > /dev/null
+      - kubectl exec -t $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- free
+
+  clear_memory:
+    cmds:
+      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- rm -rf /data/file
+      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- free
+
+  load_memory:
+    cmds:
+      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- rm -rf /data/file
+      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- dd if=/dev/zero of=/data/file bs=1M count=256
+
   increase_replicas:
     cmds:
       - kubectl scale --replicas=3 deployment/${HELM_RELEASE} --namespace ${NAMESPACE}
@@ -38,11 +53,26 @@ tasks:
   load_disk:
     cmds:
       - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- rm -rf /data/file
-      - cmd: kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n kube-loader -- dd if=/dev/zero of=/data/file bs=1M count=1800
+      - cmd: kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n kube-loader -- dd if=/dev/zero of=/data/file bs=1M count=1900
         ignore_error: true
       - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- df -h | grep /data
 
+  disk_usage:
+    cmds:
+      - kubectl exec -t $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- df -h | grep /data
+      - kubectl exec -t $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- df -i | grep /data
+
   clean_disk:
     cmds:
-      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- rm -rf /data/file
-      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- df -h | grep /data
+      - kubectl exec -t $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- rm -rf /data/file
+      - kubectl exec -t $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- df -h | grep /data
+
+  clean_inodes:
+    cmds:
+      - kubectl exec -t $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- find /data -name '*.tmp'
+      - kubectl exec -t $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- df -i | grep /data
+
+  load_inodes:
+    cmds:
+      - kubectl exec -t $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- ./scripts/load_inodes.sh
+      - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- df -i /data

@@ -31,8 +31,8 @@ build-linux:
 docker-build:
 				docker build -t navinkbe7/$(BINARY_NAME) .
 docker-push:
-				docker tag navinkbe7/$(BINARY_NAME):latest navinkbe7/$(BINARY_NAME):v0.0.1
-				docker push navinkbe7/$(BINARY_NAME):v0.0.1
+				docker tag navinkbe7/$(BINARY_NAME):latest navinkbe7/$(BINARY_NAME):v0.0.2
+				docker push navinkbe7/$(BINARY_NAME):v0.0.2
 docker-run:
 				docker run --rm -it -p 8080:8080 \
 				-e MY_RESPONSE=container1 \

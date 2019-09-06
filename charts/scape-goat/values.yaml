@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: navinkbe7/scape-goat
-  tag: v0.0.1
+  tag: v0.0.2
   pullPolicy: Always
 
 imagePullSecrets: []
