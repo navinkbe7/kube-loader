@@ -1,0 +1,38 @@
+version: '2'
+
+env:
+  KUBECONFIG: PATH_TO_KUBECONFIG
+  HELM_VERSION: helm_2_14_3
+  TILLER_VERSION: v2.14.1
+  HELM_RELEASE: scape-goat
+  HELM_CHART: scape-goat
+  NAMESPACE: kube-loader
+
+tasks:
+  bootstrap:
+    #By default, tasks will be executed in the directory where the Taskfile is located.
+    #But you can easily make the task run in another folder informing dir
+    #dir: change/directory
+    cmds:
+      - echo $KUBECONFIG
+      - cmd: kubectl create namespace ${NAMESPACE}
+        ignore_error: true
+      - cmd: kubectl create clusterrolebinding ${NAMESPACE}-admin --clusterrole=cluster-admin --serviceaccount=${NAMESPACE}:default
+        ignore_error: true
+      - ${HELM_VERSION} init --tiller-image gcr.io/kubernetes-helm/tiller:${TILLER_VERSION} --tiller-namespace ${NAMESPACE}
+      - sleep 30s
+
+  deploy:
+    cmds:
+      - ${HELM_VERSION} upgrade --install ${HELM_RELEASE} ./charts/${HELM_CHART} --tiller-namespace ${NAMESPACE} --namespace ${NAMESPACE}
+
+  delete:
+    cmds:
+      - ${HELM_VERSION} delete --purge ${HELM_RELEASE} --tiller-namespace ${NAMESPACE}
+
+  increase_replicas:
+    cmds:
+      - kubectl scale --replicas=3 deployment/${HELM_RELEASE} --namespace ${NAMESPACE}
+      - kubectl get deployments -n ${NAMESPACE} ${HELM_RELEASE}
+
+ #poke_persistent_volumes:
