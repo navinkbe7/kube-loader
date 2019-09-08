@@ -7,8 +7,16 @@ env:
   HELM_RELEASE: scape-goat
   HELM_CHART: scape-goat
   NAMESPACE: kube-loader
+  SSH_USER: ec2-user
+  NODE_IP: 10.134.116.67
+
 
 tasks:
+  bootstrap_node:
+    cmds:
+      - ssh ${SSH_USER}@${NODE_IP} sudo yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+      - ssh ${SSH_USER}@${NODE_IP} sudo yum install stress-ng
+
   bootstrap:
     #By default, tasks will be executed in the directory where the Taskfile is located.
     #But you can easily make the task run in another folder informing dir
@@ -29,6 +37,43 @@ tasks:
   delete:
     cmds:
       - ${HELM_VERSION} delete --purge ${HELM_RELEASE} --tiller-namespace ${NAMESPACE}
+
+  load_cpu_node:
+    cmds:
+      - ssh ${SSH_USER}@${NODE_IP} sudo stress-ng --cpu 6 --timeout 300s --metrics-brief
+
+  load_memory_node:
+    cmds:
+      - ssh ${SSH_USER}@${NODE_IP} sudo stress-ng --vm 2 --vm-bytes 13G --timeout 600s
+
+  load_disk_node:
+    cmds:
+      - ssh ${SSH_USER}@${NODE_IP} sudo rm -rf /root/file
+      - ssh ${SSH_USER}@${NODE_IP} sudo dd if=/dev/zero of=/root/file bs=1000M count=85
+
+  cleanup_disk_node:
+    cmds:
+      - ssh ${SSH_USER}@${NODE_IP} sudo rm -rf /root/file
+
+  stop_docker:
+    cmds:
+      - ssh ${SSH_USER}@${NODE_IP} sudo systemctl stop docker.service
+
+  start_docker:
+    cmds:
+      - ssh ${SSH_USER}@${NODE_IP} sudo systemctl start docker.service
+
+  start_kubelet:
+    cmds:
+      - ssh ${SSH_USER}@${NODE_IP} sudo systemctl start kubelet.service
+
+  stop_kubelet:
+    cmds:
+      - ssh ${SSH_USER}@${NODE_IP} sudo systemctl stop kubelet.service
+
+  status_kubelet:
+    cmds:
+      - ssh ${SSH_USER}@${NODE_IP} sudo systemctl status kubelet.service
 
   load_cpu:
     cmds:
@@ -76,3 +121,5 @@ tasks:
     cmds:
       - kubectl exec -t $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- ./scripts/load_inodes.sh
       - kubectl exec $(kubectl get pods -n ${NAMESPACE} | grep -m1 ${HELM_RELEASE}|awk '{ print $1 }') -n ${NAMESPACE} -- df -i /data
+
+
